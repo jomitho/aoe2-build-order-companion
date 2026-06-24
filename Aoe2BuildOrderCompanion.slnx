@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Aoe2BuildOrders.Api/Aoe2BuildOrders.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Aoe2BuildOrders.Tests/Aoe2BuildOrders.Tests.csproj" />
+  </Folder>
+</Solution>

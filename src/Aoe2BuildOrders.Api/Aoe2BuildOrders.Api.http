@@ -1,0 +1,6 @@
+@Aoe2BuildOrders.Api_HostAddress = http://localhost:5198
+
+GET {{Aoe2BuildOrders.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
