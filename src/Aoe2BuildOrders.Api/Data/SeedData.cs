@@ -4,7 +4,7 @@ namespace Aoe2BuildOrders.Api.Data;
 
 public static class SeedData
 {
-    public static readonly List<BuildOrder> BuildOrders =
+    public static List<BuildOrder> BuildOrders { get; } =
     [
         new BuildOrder
         {
