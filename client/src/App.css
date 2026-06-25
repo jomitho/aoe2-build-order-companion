@@ -9,6 +9,10 @@ body {
   margin: 0;
 }
 
+button {
+  font: inherit;
+}
+
 .app {
   min-height: 100vh;
 }
@@ -25,6 +29,11 @@ body {
   letter-spacing: 0.16em;
   font-size: 0.8rem;
   opacity: 0.8;
+}
+
+.eyebrow.dark {
+  color: #7f4f24;
+  opacity: 1;
 }
 
 h1 {
@@ -63,18 +72,38 @@ h1 {
   color: #64748b;
 }
 
-.buildOrderGrid {
+.layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
+  grid-template-columns: minmax(260px, 420px) 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.buildOrderList {
+  display: grid;
+  gap: 16px;
 }
 
 .buildOrderCard {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 18px;
   padding: 22px;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.buildOrderCard:hover {
+  transform: translateY(-2px);
+  border-color: #7f4f24;
+}
+
+.buildOrderCard.selected {
+  border-color: #7f4f24;
+  box-shadow: 0 16px 36px rgba(127, 79, 36, 0.18);
 }
 
 .cardHeader {
@@ -126,7 +155,83 @@ h1 {
   font-weight: 700;
 }
 
+.detailPanel {
+  background: white;
+  border-radius: 22px;
+  padding: 28px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.detailHeader h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.detailHeader p:last-child {
+  color: #475569;
+  line-height: 1.6;
+}
+
+.stepTimeline {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.stepItem {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+}
+
+.stepNumber {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #14213d;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.stepContent {
+  border-left: 3px solid #e5e7eb;
+  padding-left: 16px;
+}
+
+.stepMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stepMeta span {
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #334155;
+  padding: 4px 9px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.stepContent p {
+  margin: 10px 0 4px;
+  line-height: 1.5;
+}
+
+.stepContent small {
+  color: #64748b;
+}
+
 .error {
   color: #b91c1c;
   font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
 }
