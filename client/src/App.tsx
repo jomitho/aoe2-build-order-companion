@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import "./App.css";
-import { getBuildOrderById, getBuildOrders } from "./api/buildOrdersApi";
+
+import { 
+  createBuildOrder, 
+  getBuildOrderById, 
+  getBuildOrders,
+  type CreateBuildOrderInput, 
+} from "./api/buildOrdersApi";
+
 import type { BuildOrderDetail, BuildOrderSummary } from "./types/buildOrder";
 
 function App() {
@@ -9,6 +16,7 @@ function App() {
     useState<BuildOrderDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,7 +52,79 @@ function App() {
     }
   }
 
+  async function handleCreateSampleBuildOrder() {
+    setIsCreating(true);
+    setErrorMessage(null);
+
+    const input: CreateBuildOrderInput = {
+      name: "Men-at-Arms into Archers",
+      civilization: "Generic",
+      strategyType: "Infantry/Archers",
+      difficulty: "Intermediate",
+      description:
+        "A Feudal Age opening that applies early pressure with militia before transitioning into archers.",
+      steps: [
+        {
+          stepNumber: 1,
+          population: 6,
+          age: "Dark Age",
+          instruction: "Send starting villagers to sheep.",
+          resourceFocus: "Food",
+          notes: "Keep the town center producing villagers.",
+        },
+        {
+          stepNumber: 2,
+          population: 10,
+          age: "Dark Age",
+          instruction: "Send villagers to wood and build a lumber camp.",
+          resourceFocus: "Wood",
+        },
+        {
+          stepNumber: 3,
+          population: 14,
+          age: "Dark Age",
+          instruction: "Send villagers to berries and build a mill.",
+          resourceFocus: "Food",
+        },
+        {
+          stepNumber: 4,
+          population: 18,
+          age: "Dark Age",
+          instruction: "Send villagers to gold and prepare militia production.",
+          resourceFocus: "Gold",
+        },
+        {
+          stepNumber: 5,
+          population: 21,
+          age: "Dark Age",
+          instruction: "Click up to Feudal Age and upgrade militia to Men-at-Arms.",
+          resourceFocus: "Food/Gold",
+        },
+        {
+          stepNumber: 6,
+          population: 22,
+          age: "Feudal Age",
+          instruction: "Build archery ranges and transition into archer production.",
+          resourceFocus: "Wood/Gold",
+        },
+      ],
+    };
+
+    try {
+      const createdBuildOrder = await createBuildOrder(input);
+      const updatedBuildOrders = await getBuildOrders();
+
+      setBuildOrders(updatedBuildOrders);
+      setSelectedBuildOrder(createdBuildOrder);
+    } catch {
+      setErrorMessage("Could not create build order.");
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
   return (
+
     <main className="app">
       <section className="hero">
         <p className="eyebrow">Age of Empires II</p>
@@ -55,9 +135,20 @@ function App() {
       </section>
 
       <section className="content">
+
         <div className="sectionHeader">
-          <h2>Build orders</h2>
-          <span>{buildOrders.length} available</span>
+          <div>
+            <h2>Build orders</h2>
+            <span>{buildOrders.length} available</span>
+          </div>
+
+          <button
+            className="primaryButton"
+            onClick={handleCreateSampleBuildOrder}
+            disabled={isCreating}
+          >
+            {isCreating ? "Creating..." : "Add sample build order"}
+          </button>
         </div>
 
         {isLoading && <p>Loading build orders...</p>}
