@@ -1,3 +1,5 @@
+import { CreateBuildOrderForm } from "./components/CreateBuildOrderForm";
+
 import { useEffect, useState } from 'react';
 import "./App.css";
 
@@ -53,63 +55,9 @@ function App() {
     }
   }
 
-  async function handleCreateSampleBuildOrder() {
+  async function handleCreateBuildOrder(input: CreateBuildOrderInput) {
     setIsCreating(true);
     setErrorMessage(null);
-
-    const input: CreateBuildOrderInput = {
-      name: "Men-at-Arms into Archers",
-      civilization: "Generic",
-      strategyType: "Infantry/Archers",
-      difficulty: "Intermediate",
-      description:
-        "A Feudal Age opening that applies early pressure with militia before transitioning into archers.",
-      steps: [
-        {
-          stepNumber: 1,
-          population: 6,
-          age: "Dark Age",
-          instruction: "Send starting villagers to sheep.",
-          resourceFocus: "Food",
-          notes: "Keep the town center producing villagers.",
-        },
-        {
-          stepNumber: 2,
-          population: 10,
-          age: "Dark Age",
-          instruction: "Send villagers to wood and build a lumber camp.",
-          resourceFocus: "Wood",
-        },
-        {
-          stepNumber: 3,
-          population: 14,
-          age: "Dark Age",
-          instruction: "Send villagers to berries and build a mill.",
-          resourceFocus: "Food",
-        },
-        {
-          stepNumber: 4,
-          population: 18,
-          age: "Dark Age",
-          instruction: "Send villagers to gold and prepare militia production.",
-          resourceFocus: "Gold",
-        },
-        {
-          stepNumber: 5,
-          population: 21,
-          age: "Dark Age",
-          instruction: "Click up to Feudal Age and upgrade militia to Men-at-Arms.",
-          resourceFocus: "Food/Gold",
-        },
-        {
-          stepNumber: 6,
-          population: 22,
-          age: "Feudal Age",
-          instruction: "Build archery ranges and transition into archer production.",
-          resourceFocus: "Wood/Gold",
-        },
-      ],
-    };
 
     try {
       const createdBuildOrder = await createBuildOrder(input);
@@ -166,27 +114,26 @@ function App() {
 
       <section className="content">
 
-        <div className="sectionHeader">
-          <div>
-            <h2>Build orders</h2>
-            <span>{buildOrders.length} available</span>
-          </div>
-
-          <button
-            className="primaryButton"
-            onClick={handleCreateSampleBuildOrder}
-            disabled={isCreating}
-          >
-            {isCreating ? "Creating..." : "Add sample build order"}
-          </button>
-        </div>
+    <div className="sectionHeader">
+      <div>
+        <h2>Build orders</h2>
+        <span>{buildOrders.length} available</span>
+      </div>
+    </div>
 
         {isLoading && <p>Loading build orders...</p>}
 
         {errorMessage && <p className="error">{errorMessage}</p>}
 
         {!isLoading && (
+
           <div className="layout">
+
+            <CreateBuildOrderForm
+              onCreate={handleCreateBuildOrder}
+              isCreating={isCreating}
+            />
+        
             <div className="buildOrderList">
               {buildOrders.map((buildOrder) => (
                 <button
