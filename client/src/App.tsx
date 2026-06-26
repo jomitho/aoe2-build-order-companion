@@ -3,6 +3,7 @@ import "./App.css";
 
 import { 
   createBuildOrder, 
+  deleteBuildOrder,
   getBuildOrderById, 
   getBuildOrders,
   type CreateBuildOrderInput, 
@@ -123,6 +124,35 @@ function App() {
     }
   }
 
+  async function handleDeleteSelectedBuildOrder() {
+    if (!selectedBuildOrder) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `Delete "${selectedBuildOrder.name}"? This cannot be undone.`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      await deleteBuildOrder(selectedBuildOrder.id);
+
+      const updatedBuildOrders = await getBuildOrders();
+      setBuildOrders(updatedBuildOrders);
+
+      if (updatedBuildOrders.length > 0) {
+        await loadBuildOrderDetail(updatedBuildOrders[0].id);
+      } else {
+        setSelectedBuildOrder(null);
+      }
+    } catch {
+      setErrorMessage("Could not delete build order.");
+    }
+  }
+
   return (
 
     <main className="app">
@@ -198,11 +228,24 @@ function App() {
 
               {!isLoadingDetail && selectedBuildOrder && (
                 <>
-                  <div className="detailHeader">
-                    <p className="eyebrow dark">{selectedBuildOrder.strategyType}</p>
-                    <h2>{selectedBuildOrder.name}</h2>
-                    <p>{selectedBuildOrder.description}</p>
-                  </div>
+
+<div className="detailHeader">
+  <div className="detailTitleRow">
+    <div>
+      <p className="eyebrow dark">{selectedBuildOrder.strategyType}</p>
+      <h2>{selectedBuildOrder.name}</h2>
+    </div>
+
+    <button
+      className="dangerButton"
+      onClick={handleDeleteSelectedBuildOrder}
+    >
+      Delete
+    </button>
+  </div>
+
+  <p>{selectedBuildOrder.description}</p>
+</div>
 
                   <div className="stepTimeline">
                     {selectedBuildOrder.steps.map((step) => (

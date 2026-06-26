@@ -193,6 +193,27 @@ h1 {
   line-height: 1.6;
 }
 
+.detailTitleRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.dangerButton {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.dangerButton:hover {
+  background: #fecaca;
+}
+
 .stepTimeline {
   display: grid;
   gap: 16px;
