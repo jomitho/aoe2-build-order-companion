@@ -1,6 +1,7 @@
 using Aoe2BuildOrders.Api.Data;
 using Aoe2BuildOrders.Api.Dtos;
 using Aoe2BuildOrders.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +16,28 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    dbContext.Database.Migrate();
+
+    if (!dbContext.BuildOrders.Any())
+    {
+        dbContext.BuildOrders.AddRange(SeedData.BuildOrders);
+        dbContext.SaveChanges();
+    }
+}
 
 app.UseCors("AllowReactClient");
 
@@ -33,9 +52,11 @@ app.MapGet("/", () => Results.Ok(new
     status = "running"
 }));
 
-app.MapGet("/api/buildorders", () =>
+app.MapGet("/api/buildorders", async (AppDbContext dbContext) =>
 {
-    var buildOrders = SeedData.BuildOrders
+    var buildOrders = await dbContext.BuildOrders
+        .AsNoTracking()
+        .Include(buildOrder => buildOrder.Steps)
         .Select(buildOrder => new
         {
             buildOrder.Id,
@@ -45,21 +66,32 @@ app.MapGet("/api/buildorders", () =>
             buildOrder.Difficulty,
             buildOrder.Description,
             StepCount = buildOrder.Steps.Count
-        });
+        })
+        .ToListAsync();
 
     return Results.Ok(buildOrders);
 });
 
-app.MapGet("/api/buildorders/{id:int}", (int id) =>
+app.MapGet("/api/buildorders/{id:int}", async (int id, AppDbContext dbContext) =>
 {
-    var buildOrder = SeedData.BuildOrders.FirstOrDefault(buildOrder => buildOrder.Id == id);
+    var buildOrder = await dbContext.BuildOrders
+        .AsNoTracking()
+        .Include(buildOrder => buildOrder.Steps)
+        .FirstOrDefaultAsync(buildOrder => buildOrder.Id == id);
 
-    return buildOrder is null
-        ? Results.NotFound()
-        : Results.Ok(buildOrder);
+        if (buildOrder is null)
+    {
+        return Results.NotFound();
+    }
+
+    buildOrder.Steps = buildOrder.Steps
+        .OrderBy(step => step.StepNumber)
+        .ToList();
+
+    return Results.Ok(buildOrder);
 });
 
-app.MapPost("/api/buildorders", (CreateBuildOrderRequest request) =>
+app.MapPost("/api/buildorders", async (CreateBuildOrderRequest request, AppDbContext dbContext) =>
 {
     if (string.IsNullOrWhiteSpace(request.Name))
     {
@@ -81,18 +113,8 @@ app.MapPost("/api/buildorders", (CreateBuildOrderRequest request) =>
         return Results.BadRequest("Difficulty is required.");
     }
 
-    var nextBuildOrderId = SeedData.BuildOrders.Count == 0
-        ? 1
-        : SeedData.BuildOrders.Max(buildOrder => buildOrder.Id) + 1;
-
-    var nextStepId = SeedData.BuildOrders
-        .SelectMany(buildOrder => buildOrder.Steps)
-        .DefaultIfEmpty()
-        .Max(step => step?.Id ?? 0) + 1;
-
     var buildOrder = new BuildOrder
     {
-        Id = nextBuildOrderId,
         Name = request.Name,
         Civilization = request.Civilization,
         StrategyType = request.StrategyType,
@@ -102,8 +124,6 @@ app.MapPost("/api/buildorders", (CreateBuildOrderRequest request) =>
             .OrderBy(step => step.StepNumber)
             .Select(step => new BuildOrderStep
             {
-                Id = nextStepId++,
-                BuildOrderId = nextBuildOrderId,
                 StepNumber = step.StepNumber,
                 Population = step.Population,
                 Age = step.Age,
@@ -114,14 +134,17 @@ app.MapPost("/api/buildorders", (CreateBuildOrderRequest request) =>
             .ToList()
     };
 
-    SeedData.BuildOrders.Add(buildOrder);
+    dbContext.BuildOrders.Add(buildOrder);
+    await dbContext.SaveChangesAsync();
 
     return Results.Created($"/api/buildorders/{buildOrder.Id}", buildOrder);
 });
 
-app.MapPut("/api/buildorders/{id:int}", (int id, UpdateBuildOrderRequest request) =>
+app.MapPut("/api/buildorders/{id:int}", async (int id, UpdateBuildOrderRequest request, AppDbContext dbContext) =>
 {
-    var existingBuildOrder = SeedData.BuildOrders.FirstOrDefault(buildOrder => buildOrder.Id == id);
+    var existingBuildOrder = await dbContext.BuildOrders
+        .Include(buildOrder => buildOrder.Steps)
+        .FirstOrDefaultAsync(buildOrder => buildOrder.Id == id);
 
     if (existingBuildOrder is null)
     {
@@ -148,21 +171,18 @@ app.MapPut("/api/buildorders/{id:int}", (int id, UpdateBuildOrderRequest request
         return Results.BadRequest("Difficulty is required.");
     }
 
-    var nextStepId = SeedData.BuildOrders
-        .SelectMany(buildOrder => buildOrder.Steps)
-        .DefaultIfEmpty()
-        .Max(step => step?.Id ?? 0) + 1;
-
     existingBuildOrder.Name = request.Name;
     existingBuildOrder.Civilization = request.Civilization;
     existingBuildOrder.StrategyType = request.StrategyType;
     existingBuildOrder.Difficulty = request.Difficulty;
     existingBuildOrder.Description = request.Description;
+
+    dbContext.BuildOrderSteps.RemoveRange(existingBuildOrder.Steps);
+
     existingBuildOrder.Steps = request.Steps
         .OrderBy(step => step.StepNumber)
         .Select(step => new BuildOrderStep
         {
-            Id = nextStepId++,
             BuildOrderId = existingBuildOrder.Id,
             StepNumber = step.StepNumber,
             Population = step.Population,
@@ -173,19 +193,23 @@ app.MapPut("/api/buildorders/{id:int}", (int id, UpdateBuildOrderRequest request
         })
         .ToList();
 
+    await dbContext.SaveChangesAsync();
+
     return Results.Ok(existingBuildOrder);
 });
 
-app.MapDelete("/api/buildorders/{id:int}", (int id) =>
+app.MapDelete("/api/buildorders/{id:int}", async (int id, AppDbContext dbContext) =>
 {
-    var buildOrder = SeedData.BuildOrders.FirstOrDefault(buildOrder => buildOrder.Id == id);
+    var buildOrder = await dbContext.BuildOrders
+        .FirstOrDefaultAsync(buildOrder => buildOrder.Id == id);
 
     if (buildOrder is null)
     {
         return Results.NotFound();
     }
 
-    SeedData.BuildOrders.Remove(buildOrder);
+    dbContext.BuildOrders.Remove(buildOrder);
+    await dbContext.SaveChangesAsync();
 
     return Results.NoContent();
 });

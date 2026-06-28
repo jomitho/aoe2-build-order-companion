@@ -8,7 +8,6 @@ public static class SeedData
     [
         new BuildOrder
         {
-            Id = 1,
             Name = "21 Pop Scouts",
             Civilization = "Generic",
             StrategyType = "Scouts",
@@ -18,8 +17,6 @@ public static class SeedData
             [
                 new BuildOrderStep
                 {
-                    Id = 1,
-                    BuildOrderId = 1,
                     StepNumber = 1,
                     Population = 6,
                     Age = "Dark Age",
@@ -28,8 +25,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 2,
-                    BuildOrderId = 1,
                     StepNumber = 2,
                     Population = 7,
                     Age = "Dark Age",
@@ -38,8 +33,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 3,
-                    BuildOrderId = 1,
                     StepNumber = 3,
                     Population = 10,
                     Age = "Dark Age",
@@ -48,8 +41,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 4,
-                    BuildOrderId = 1,
                     StepNumber = 4,
                     Population = 11,
                     Age = "Dark Age",
@@ -58,8 +49,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 5,
-                    BuildOrderId = 1,
                     StepNumber = 5,
                     Population = 15,
                     Age = "Dark Age",
@@ -68,8 +57,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 6,
-                    BuildOrderId = 1,
                     StepNumber = 6,
                     Population = 18,
                     Age = "Dark Age",
@@ -78,8 +65,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 7,
-                    BuildOrderId = 1,
                     StepNumber = 7,
                     Population = 21,
                     Age = "Dark Age",
@@ -88,8 +73,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 8,
-                    BuildOrderId = 1,
                     StepNumber = 8,
                     Population = 21,
                     Age = "Feudal Age",
@@ -100,7 +83,6 @@ public static class SeedData
         },
         new BuildOrder
         {
-            Id = 2,
             Name = "Fast Castle",
             Civilization = "Generic",
             StrategyType = "Boom",
@@ -110,8 +92,6 @@ public static class SeedData
             [
                 new BuildOrderStep
                 {
-                    Id = 9,
-                    BuildOrderId = 2,
                     StepNumber = 1,
                     Population = 6,
                     Age = "Dark Age",
@@ -120,8 +100,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 10,
-                    BuildOrderId = 2,
                     StepNumber = 2,
                     Population = 10,
                     Age = "Dark Age",
@@ -130,8 +108,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 11,
-                    BuildOrderId = 2,
                     StepNumber = 3,
                     Population = 12,
                     Age = "Dark Age",
@@ -140,8 +116,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 12,
-                    BuildOrderId = 2,
                     StepNumber = 4,
                     Population = 16,
                     Age = "Dark Age",
@@ -150,8 +124,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 13,
-                    BuildOrderId = 2,
                     StepNumber = 5,
                     Population = 25,
                     Age = "Dark Age",
@@ -160,8 +132,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 14,
-                    BuildOrderId = 2,
                     StepNumber = 6,
                     Population = 27,
                     Age = "Feudal Age",
@@ -170,8 +140,6 @@ public static class SeedData
                 },
                 new BuildOrderStep
                 {
-                    Id = 15,
-                    BuildOrderId = 2,
                     StepNumber = 7,
                     Population = 28,
                     Age = "Feudal Age",
