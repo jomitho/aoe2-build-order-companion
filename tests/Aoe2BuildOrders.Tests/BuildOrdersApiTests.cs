@@ -130,6 +130,66 @@ public class BuildOrdersApiTests
         Assert.Equal(HttpStatusCode.NotFound, getDeletedResponse.StatusCode);
     }
 
+
+
+
+[Fact]
+public async Task GetBuildOrderById_WhenBuildOrderDoesNotExist_ReturnsNotFound()
+{
+    await using var application = new BuildOrdersApiApplication();
+
+    var client = application.CreateClient();
+
+    var response = await client.GetAsync("/api/buildorders/999");
+
+    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+}
+
+[Fact]
+public async Task DeleteBuildOrder_WhenBuildOrderDoesNotExist_ReturnsNotFound()
+{
+    await using var application = new BuildOrdersApiApplication();
+
+    var client = application.CreateClient();
+
+    var response = await client.DeleteAsync("/api/buildorders/999");
+
+    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+}
+
+[Fact]
+public async Task CreateBuildOrder_WhenNameIsMissing_ReturnsBadRequest()
+{
+    await using var application = new BuildOrdersApiApplication();
+
+    var client = application.CreateClient();
+
+    var request = new CreateBuildOrderRequest
+    {
+        Name = "",
+        Civilization = "Franks",
+        StrategyType = "Scouts",
+        Difficulty = "Beginner",
+        Description = "Invalid test build order.",
+        Steps =
+        [
+            new CreateBuildOrderStepRequest
+            {
+                StepNumber = 1,
+                Population = 6,
+                Age = "Dark Age",
+                Instruction = "Send starting villagers to sheep.",
+                ResourceFocus = "Food",
+                Notes = null
+            }
+        ]
+    };
+
+    var response = await client.PostAsJsonAsync("/api/buildorders", request);
+
+    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+}
+
 private sealed class BuildOrdersApiApplication : WebApplicationFactory<Program>
 {
     private readonly InMemoryDatabaseRoot _databaseRoot = new();
