@@ -20,6 +20,12 @@ export type CreateBuildOrderInput = {
   steps: BuildOrderStepInput[];
 };
 
+
+
+export type UpdateBuildOrderInput = CreateBuildOrderInput;
+
+
+
 export async function getBuildOrders(): Promise<BuildOrderSummary[]> {
   const response = await fetch(`${API_BASE_URL}/api/buildorders`);
 
@@ -66,4 +72,21 @@ export async function deleteBuildOrder(id: number): Promise<void> {
   if (!response.ok) {
     throw new Error("Failed to delete build order");
   }
+}
+
+export async function updateBuildOrder(
+  id: number,
+  input: UpdateBuildOrderInput
+): Promise<BuildOrderDetail> {
+  const response = await fetch(`${API_BASE_URL}/api/buildorders/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update build order");
+  }
+
+  return response.json();
 }

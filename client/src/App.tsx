@@ -3,12 +3,20 @@ import { CreateBuildOrderForm } from "./components/CreateBuildOrderForm";
 import { useEffect, useState } from 'react';
 import "./App.css";
 
+import { EditBuildOrderForm } from "./components/EditBuildOrderForm";
+
 import { 
   createBuildOrder, 
   deleteBuildOrder,
   getBuildOrderById, 
   getBuildOrders,
+
+  updateBuildOrder,
+
   type CreateBuildOrderInput, 
+
+  type UpdateBuildOrderInput,
+
 } from "./api/buildOrdersApi";
 
 import type { BuildOrderDetail, BuildOrderSummary } from "./types/buildOrder";
@@ -21,6 +29,9 @@ function App() {
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     async function loadBuildOrders() {
@@ -101,6 +112,32 @@ function App() {
     }
   }
 
+  async function handleUpdateBuildOrder(input: UpdateBuildOrderInput) {
+    if (!selectedBuildOrder) {
+      return;
+    }
+
+    setIsUpdating(true);
+    setErrorMessage(null);
+
+    try {
+      const updatedBuildOrder = await updateBuildOrder(
+        selectedBuildOrder.id,
+        input
+      );
+
+      const updatedBuildOrders = await getBuildOrders();
+
+      setBuildOrders(updatedBuildOrders);
+      setSelectedBuildOrder(updatedBuildOrder);
+      setIsEditing(false);
+    } catch {
+      setErrorMessage("Could not update build order.");
+    } finally {
+      setIsUpdating(false);
+    }
+  }
+
   return (
 
     <main className="app">
@@ -170,29 +207,48 @@ function App() {
               ))}
             </div>
 
-            <section className="detailPanel">
-              {isLoadingDetail && <p>Loading details...</p>}
+<section className="detailPanel">
+  {isLoadingDetail && <p>Loading details...</p>}
 
-              {!isLoadingDetail && selectedBuildOrder && (
-                <>
+  {!isLoadingDetail && selectedBuildOrder && (
+    <>
+      {isEditing ? (
+        <EditBuildOrderForm
+          buildOrder={selectedBuildOrder}
+          onUpdate={handleUpdateBuildOrder}
+          onCancel={() => setIsEditing(false)}
+          isUpdating={isUpdating}
+        />
+      ) : (
+        <>
+          <div className="detailHeader">
+            <div className="detailTitleRow">
+              <div>
+                <p className="eyebrow dark">
+                  {selectedBuildOrder.strategyType}
+                </p>
+                <h2>{selectedBuildOrder.name}</h2>
+              </div>
 
-<div className="detailHeader">
-  <div className="detailTitleRow">
-    <div>
-      <p className="eyebrow dark">{selectedBuildOrder.strategyType}</p>
-      <h2>{selectedBuildOrder.name}</h2>
-    </div>
+              <div className="detailActions">
+                <button
+                  className="secondaryButton"
+                  onClick={() => setIsEditing(true)}
+                >
+                  Edit
+                </button>
 
-    <button
-      className="dangerButton"
-      onClick={handleDeleteSelectedBuildOrder}
-    >
-      Delete
-    </button>
-  </div>
+                <button
+                  className="dangerButton"
+                  onClick={handleDeleteSelectedBuildOrder}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
 
-  <p>{selectedBuildOrder.description}</p>
-</div>
+            <p>{selectedBuildOrder.description}</p>
+          </div>
 
                   <div className="stepTimeline">
                     {selectedBuildOrder.steps.map((step) => (
@@ -217,7 +273,9 @@ function App() {
                   </div>
                 </>
               )}
-            </section>
+            </>
+          )}
+        </section>
           </div>
         )}
       </section>
@@ -225,4 +283,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
